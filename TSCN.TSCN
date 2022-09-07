@@ -157,7 +157,7 @@ func mainmenu_toggle_fullscreen() :
 		
 func mainmenu_ani_cursor() :
 	mainmenu_tween = create_tween()
-	mainmenu_tween.tween_method(mainmenu_ani_cursor_s, 1.0, 1.5, 0.5)\\
+	mainmenu_tween.tween_method(mainmenu_ani_cursor_s, 1.0, 1.2, 0.5)\\
 		.set_ease(Tween.EASE_OUT)\\
 		.set_trans(Tween.TRANS_ELASTIC)
 	
@@ -239,7 +239,7 @@ func mainmenu_draw() :
 					mainmenu_node.draw_string(
 						sfont_b,
 						Vector2(32, root_y + (48 * i)), current_menu[0], HORIZONTAL_ALIGNMENT_LEFT, -1, 32 * mainmenu_cursor_size,
-						Color(0.8, 0.8, 0.8).lerp(Color.DARK_ORANGE, inverse_lerp(1, 1.5, mainmenu_cursor_size))
+						Color(0.8, 0.8, 0.8).lerp(Color.DARK_ORANGE, inverse_lerp(1, 1.2, mainmenu_cursor_size))
 					)
 			else :
 				mainmenu_node.draw_string(
@@ -258,14 +258,14 @@ func mainmenu_draw() :
 		var l := Vector2(32, root_y + (48 * (mainmenu_reverse if mainmenu_reverse >= 0 else mainmenu_tween_accept_c))).lerp(Vector2(32, mainmenu_node.size.y - 512), mainmenu_tween_accept_w)
 		mainmenu_node.draw_string(
 			sfont_b,
-			l, mainmenu_current_head if mainmenu_reverse >= 0 else mainmenu_current[mainmenu_tween_accept_c][0], HORIZONTAL_ALIGNMENT_LEFT, -1, lerp(32.0, 64.0, mainmenu_tween_accept_w),
+			l, mainmenu_current_head if mainmenu_reverse >= 0 else mainmenu_current[mainmenu_tween_accept_c][0], HORIZONTAL_ALIGNMENT_LEFT, -1, lerp(32.0 * mainmenu_cursor_size, 80.0, mainmenu_tween_accept_w),
 			Color.DARK_ORANGE
 		)
 		
 	if !mainmenu_current_head.is_empty() and mainmenu_reverse < 0 :
 		mainmenu_node.draw_string(
 			sfont_b,
-			Vector2(32, mainmenu_node.size.y - 512), mainmenu_current_head, HORIZONTAL_ALIGNMENT_LEFT, -1, 64,
+			Vector2(32, mainmenu_node.size.y - 512), mainmenu_current_head, HORIZONTAL_ALIGNMENT_LEFT, -1, 80,
 			Color.DARK_ORANGE
 		)
 			
