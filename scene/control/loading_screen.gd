@@ -1,2 +1,0 @@
-extends ColorRect
-class_name Toy_LoadingScreen

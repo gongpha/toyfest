@@ -13,15 +13,9 @@ _global_script_classes=[{
 "class": &"ToyTextureGen",
 "language": &"GDScript",
 "path": "res://script/ncfu/texture_gen.gd"
-}, {
-"base": "ColorRect",
-"class": &"Toy_LoadingScreen",
-"language": &"GDScript",
-"path": "res://scene/control/loading_screen.gd"
 }]
 _global_script_class_icons={
-"ToyTextureGen": "",
-"Toy_LoadingScreen": ""
+"ToyTextureGen": ""
 }
 
 [application]

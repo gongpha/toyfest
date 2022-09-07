@@ -28,7 +28,6 @@ script = SubResource("GDScript_cbm5j")
 [node name="t1" type="TextureRect" parent="."]
 unique_name_in_owner = true
 texture_filter = 1
-layout_mode = 0
 offset_left = 98.0
 offset_top = 65.0
 offset_right = 479.0
@@ -37,7 +36,6 @@ offset_bottom = 329.0
 [node name="t2" type="TextureRect" parent="."]
 unique_name_in_owner = true
 texture_filter = 1
-layout_mode = 1
 offset_left = 545.0
 offset_top = 58.0
 offset_right = 926.0
