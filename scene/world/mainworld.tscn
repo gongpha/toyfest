@@ -1,0 +1,9 @@
+[gd_scene load_steps=2 format=3 uid="uid://dea3tlm3hmupu"]
+
+[sub_resource type="Environment" id="Environment_pnmwj"]
+background_mode = 1
+
+[node name="worldspawn" type="Node3D"]
+
+[node name="env" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_pnmwj")
