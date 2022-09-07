@@ -8,21 +8,10 @@
 
 config_version=5
 
-_global_script_classes=[{
-"base": "RefCounted",
-"class": &"ToyTextureGen",
-"language": &"GDScript",
-"path": "res://script/ncfu/texture_gen.gd"
-}]
-_global_script_class_icons={
-"ToyTextureGen": ""
-}
-
 [application]
 
 config/name="real512toyfest"
-run/main_scene="res://main.tscn"
+run/main_scene="res://TSCN.TSCN"
 config/features=PackedStringArray("4.0", "Vulkan Clustered")
 boot_splash/show_image=false
 boot_splash/bg_color=Color(1, 1, 1, 1)
-config/icon="res://icon.svg"

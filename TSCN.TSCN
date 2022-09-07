@@ -1,0 +1,332 @@
+[gd_resource type="PackedScene" load_steps=2 format=3 uid="uid://c30bg4nii4131"]
+
+[sub_resource type="GDScript" id="GDScript_5ilbj"]
+resource_name = "MAIN"
+script/source = "extends Node
+
+@export var theme : Theme
+
+var root_control : Control
+
+var worldspawn : Node3D
+
+var sfont : SystemFont
+var sfont_m : SystemFont
+var sfont_b : FontVariation
+
+var settings : Dictionary
+
+func _ready() :
+	sfont = SystemFont.new()
+	sfont.font_names = [
+		\"Arial Rounded MT\",
+		#\"Platale\",
+		\"Verdana\"
+	]
+	sfont_b = FontVariation.new()
+	sfont_b.base_font = sfont
+	sfont_b.variation_embolden = 0.75
+	
+	sfont_m = SystemFont.new()
+	sfont_m.font_names = [
+		\"Courier New\"
+	]
+	
+	set_process(false)
+	RenderingServer.set_default_clear_color(Color.WHITE)
+	root_control = Control.new()
+	root_control.theme = theme
+	root_control.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
+	
+	_pre_start_load()
+	
+var process_pre : bool = false
+	
+func _process(delta : float) :
+	if process_pre :
+		_pre_proc(delta)
+	
+func update_processing() :
+	set_process(
+		process_pre
+	)
+	
+func _input(e : InputEvent) :
+	if mainmenu_node :
+		if e.is_action_pressed(\"ui_up\") and mainmenu_cursor > 0 :
+			mainmenu_cursor -= 1
+			mainmenu_ani_cursor()
+		if e.is_action_pressed(\"ui_down\") and mainmenu_current.size() - 1 > mainmenu_cursor :
+			mainmenu_cursor += 1
+			mainmenu_ani_cursor()
+		if e.is_action_pressed(\"ui_accept\") and mainmenu_cursor >= 0 :
+			mainmenu_confirm()
+##########- PRE -##########
+	
+func _pre_loadingscreen_instantiate() -> Array :
+	var vbox := VBoxContainer.new()
+	var bar := ProgressBar.new()
+	bar.max_value = 1.0
+	bar.value = 0.5
+	bar.percent_visible = false
+	bar.custom_minimum_size = Vector2(256, 32)
+	var label := Label.new()
+	label.text = \"Loading . . .\"
+	label.add_theme_color_override(&'font_color', Color.BLACK)
+	vbox.add_child(bar)
+	vbox.add_child(label)
+	vbox.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
+	return [vbox, bar, label]
+	
+func _pre_start_load() :
+	var arr := _pre_loadingscreen_instantiate()
+	pre_vbox = arr[0]
+	root_control.add_child(pre_vbox)
+	add_child(root_control)
+	
+	process_pre = true
+	update_processing()
+	
+enum Pre_LoadStep {
+	GEN_TEXTURES
+}
+
+var pre_step : int = Pre_LoadStep.GEN_TEXTURES
+var pre_vbox : VBoxContainer
+
+func _pre_proc(d : float) :
+	var e := _pre_poll()
+	if e == ERR_FILE_EOF :
+		process_pre = false
+		update_processing()
+		pre_vbox.free()
+		
+		mainmenu_prepare()
+
+func _pre_poll() -> int :
+	return ERR_FILE_EOF
+	
+##########- MAINMENU -##########
+
+var MAINMENU_STRUCTURE := [
+	['Start', null],
+	['Settings', [
+		['Toggle Fullscreen', mainmenu_toggle_fullscreen],
+		['Back', -1]
+	]],
+	['Shutdown', [
+		['No', -1],
+		['Yes', mainmenu_exit]
+	]],
+]
+
+var mainmenu_node : Control
+var mainmenu_level : Array # <vec2, i> . . .
+var mainmenu_current : Array
+var mainmenu_current_head : String
+var mainmenu_cursor : int = -1
+var mainmenu_cursor_size : float = 1.0
+var mainmenu_tween : Tween
+var mainmenu_tween_accept : Tween
+var mainmenu_tween_accept_c : int
+var mainmenu_tween_accept_w : float
+var mainmenu_reverse : int = -1
+
+func mainmenu_get_last(back : int = 0) :
+	var level : int = 0
+	mainmenu_current = MAINMENU_STRUCTURE
+	mainmenu_current_head = \"\"
+	while level < mainmenu_level.size() + back :
+		mainmenu_current = mainmenu_current[mainmenu_level[level]]
+		mainmenu_current_head = mainmenu_current[0]
+		var v = mainmenu_current[1]
+		if v is Array :
+			mainmenu_current = v
+		
+		level += 1
+		
+func mainmenu_toggle_fullscreen() :
+	if settings.has('fullscreen') :
+		settings.fullscreen = !settings.fullscreen
+	else :
+		settings.fullscreen = true
+	if settings.fullscreen :
+		DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_FULLSCREEN)
+	else :
+		DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_WINDOWED)
+		
+func mainmenu_ani_cursor() :
+	mainmenu_tween = create_tween()
+	mainmenu_tween.tween_method(mainmenu_ani_cursor_s, 1.0, 1.5, 0.5)\\
+		.set_ease(Tween.EASE_OUT)\\
+		.set_trans(Tween.TRANS_ELASTIC)
+	
+func mainmenu_ani_cursor_s(v : float) :
+	mainmenu_cursor_size = v
+	mainmenu_node.queue_redraw()
+	
+func mainmenu_confirm() :
+	if mainmenu_tween_accept :
+		return
+	mainmenu_reverse = -1
+	var stop : bool = false
+	var v = mainmenu_current[mainmenu_cursor][1]
+	
+	if v is int :
+		if v < 0 :
+			mainmenu_reverse = mainmenu_level[mainmenu_level.size() - 2]
+			mainmenu_cursor = mainmenu_level.back()
+			mainmenu_level = mainmenu_level.slice(0, mainmenu_level.size() + v)
+			#mainmenu_tween_accept_c = 0
+			var C := mainmenu_current_head
+			mainmenu_get_last()
+			#mainmenu_tween_accept_c = 
+			mainmenu_current_head = C
+	elif v is Callable :
+		v.call()
+		stop = true
+	
+	if stop :
+		return
+		
+	if mainmenu_reverse >= 0 :
+		mainmenu_tween_accept = create_tween()
+		mainmenu_tween_accept.tween_method(mainmenu_ani_confirm_s, 1.0, 0.0, 0.2)\\
+			.set_ease(Tween.EASE_IN_OUT)\\
+			.set_trans(Tween.TRANS_QUART)\\
+			.connect(&\"finished\", mainmenu_ani_confirm_f)
+	else :
+		mainmenu_tween_accept_w = 0.0
+		mainmenu_tween_accept_c = mainmenu_cursor
+		
+		mainmenu_tween_accept = create_tween()
+		mainmenu_tween_accept.tween_method(mainmenu_ani_confirm_s, 0.0, 1.0, 0.2)\\
+			.set_ease(Tween.EASE_IN_OUT)\\
+			.set_trans(Tween.TRANS_QUART)\\
+			.connect(&\"finished\", mainmenu_ani_confirm_f)
+		
+func mainmenu_ani_confirm_f() :
+	mainmenu_tween_accept = null
+	mainmenu_tween_accept_w = 0.0
+	var v = mainmenu_current[mainmenu_tween_accept_c][1]
+	if mainmenu_reverse >= 0 :
+		pass
+	else :
+		mainmenu_level.append(mainmenu_tween_accept_c)
+		mainmenu_cursor = 0
+	mainmenu_get_last()
+	mainmenu_ani_cursor()
+	mainmenu_node.queue_redraw()
+		
+func mainmenu_ani_confirm_s(v : float) :
+	mainmenu_tween_accept_w = v
+	mainmenu_node.queue_redraw()
+
+func mainmenu_draw() :
+	var all_y : int = mainmenu_current.size() * 64
+	var root_y : int = mainmenu_node.size.y - all_y
+	
+	for i in mainmenu_current.size() :
+		var current_menu = mainmenu_current[i]
+		if current_menu is Array :
+			if i == mainmenu_cursor :
+				if !(mainmenu_tween_accept_w > 0.0 and i == mainmenu_tween_accept_c) :
+					mainmenu_node.draw_string(
+						sfont_b,
+						Vector2(32 + 1, root_y + (48 * i) + 1), current_menu[0], HORIZONTAL_ALIGNMENT_LEFT, -1, 32 * mainmenu_cursor_size,
+						Color.BLACK
+					)
+					mainmenu_node.draw_string(
+						sfont_b,
+						Vector2(32, root_y + (48 * i)), current_menu[0], HORIZONTAL_ALIGNMENT_LEFT, -1, 32 * mainmenu_cursor_size,
+						Color(0.8, 0.8, 0.8).lerp(Color.DARK_ORANGE, inverse_lerp(1, 1.5, mainmenu_cursor_size))
+					)
+			else :
+				mainmenu_node.draw_string(
+					sfont,
+					Vector2(32 + 1, root_y + (48 * i) + 1), current_menu[0], HORIZONTAL_ALIGNMENT_LEFT, -1, 32,
+					Color.BLACK
+				)
+				mainmenu_node.draw_string(
+					sfont,
+					Vector2(32, root_y + (48 * i)), current_menu[0], HORIZONTAL_ALIGNMENT_LEFT, -1, 32,
+					Color(0.8, 0.8, 0.8)
+				)
+			
+	
+	if mainmenu_tween_accept_w > 0.0 :
+		var l := Vector2(32, root_y + (48 * (mainmenu_reverse if mainmenu_reverse >= 0 else mainmenu_tween_accept_c))).lerp(Vector2(32, mainmenu_node.size.y - 512), mainmenu_tween_accept_w)
+		mainmenu_node.draw_string(
+			sfont_b,
+			l, mainmenu_current_head if mainmenu_reverse >= 0 else mainmenu_current[mainmenu_tween_accept_c][0], HORIZONTAL_ALIGNMENT_LEFT, -1, lerp(32.0, 64.0, mainmenu_tween_accept_w),
+			Color.DARK_ORANGE
+		)
+		
+	if !mainmenu_current_head.is_empty() and mainmenu_reverse < 0 :
+		mainmenu_node.draw_string(
+			sfont_b,
+			Vector2(32, mainmenu_node.size.y - 512), mainmenu_current_head, HORIZONTAL_ALIGNMENT_LEFT, -1, 64,
+			Color.DARK_ORANGE
+		)
+			
+	mainmenu_node.draw_string(
+		sfont_m,
+		Vector2(32, mainmenu_node.size.y - 32), \"real512toyfest\", HORIZONTAL_ALIGNMENT_LEFT, -1, 24,
+		Color(0.0, 0.0, 0.0, 0.25)
+	)
+
+func mainmenu_prepare() :
+	mainmenu_node = Control.new()
+	mainmenu_node.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	mainmenu_node.draw.connect(mainmenu_draw)
+	add_child(mainmenu_node)
+	
+	mainmenu_get_last()
+	
+func mainmenu_exit() :
+	get_tree().quit()
+	
+##########- TEXGEN -##########
+
+func texgen_im_checker(c1 : Color, c2 : Color) -> Image :
+	var image := Image.new()
+	image.create(2, 2, true, Image.FORMAT_RGB8)
+	image.set_pixelv(Vector2i(0, 0), c1)
+	image.set_pixelv(Vector2i(1, 1), c1)
+	image.set_pixelv(Vector2i(0, 1), c2)
+	image.set_pixelv(Vector2i(1, 0), c2)
+	return image
+
+func texgen_im_stripes(width : int, colors : PackedColorArray, horizontal : bool = true) -> Image :
+	var image := Image.new()
+	image.create(width, colors.size(), true, Image.FORMAT_RGB8)
+	if horizontal :
+		for y in colors.size() :
+			for x in width :
+				image.set_pixel(x, y, colors[y])
+	else :
+		for y in colors.size() :
+			for x in width :
+				image.set_pixel(y, x, colors[y])
+	return image
+
+##############################################
+##############################################
+##############################################
+
+func _worldspawn_create() :
+	worldspawn = Node3D.new()
+"
+
+[resource]
+_bundled = {
+"conn_count": 0,
+"conns": PackedInt32Array(),
+"editable_instances": [],
+"names": PackedStringArray("TSCN", "script", "Node"),
+"node_count": 1,
+"node_paths": [],
+"nodes": PackedInt32Array(-1, -1, 2, 0, -1, 1, 1, 0, 0),
+"variants": [SubResource("GDScript_5ilbj")],
+"version": 2
+}
