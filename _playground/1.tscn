@@ -1,0 +1,175 @@
+[gd_scene load_steps=11 format=3 uid="uid://b63riidtvpx7k"]
+
+[sub_resource type="GDScript" id="GDScript_rjwmd"]
+script/source = "extends Node3D
+
+func _ready() :
+	a.call_deferred()
+	
+func a() :
+	var arr = $\"0\".get_meshes()
+	var m := MeshInstance3D.new()
+	m.mesh = arr[1]
+	m.transform = arr[0]
+	$\"0\".free()
+	add_child(m)
+"
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_avubi"]
+albedo_color = Color(1, 0.380392, 0.470588, 1)
+metallic = 0.22
+roughness = 0.0
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_gbw8m"]
+albedo_color = Color(0, 0.745098, 0.352941, 1)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_73ebp"]
+albedo_color = Color(1, 0.329412, 0.658824, 1)
+
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_6fhha"]
+
+[sub_resource type="Sky" id="Sky_eyg68"]
+sky_material = SubResource("ProceduralSkyMaterial_6fhha")
+
+[sub_resource type="Environment" id="Environment_aklas"]
+background_mode = 2
+sky = SubResource("Sky_eyg68")
+sdfgi_enabled = true
+sdfgi_cascades = 8
+sdfgi_y_scale = 0
+glow_enabled = true
+adjustment_brightness = 3.35
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_0ytht"]
+albedo_color = Color(0.658824, 0.870588, 0, 1)
+metallic = 1.0
+roughness = 0.09
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_sqia2"]
+material = SubResource("StandardMaterial3D_0ytht")
+size = Vector2(256, 256)
+
+[sub_resource type="SphereMesh" id="SphereMesh_1kql7"]
+radius = 4.0
+height = 8.0
+
+[node name="_" type="Node3D"]
+script = SubResource("GDScript_rjwmd")
+
+[node name="0" type="CSGCylinder3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.25, 0)
+radius = 10.0
+height = 5.0
+sides = 64
+smooth_faces = false
+material = SubResource("StandardMaterial3D_avubi")
+
+[node name="0" type="CSGSphere3D" parent="0"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, -2.25, 0)
+operation = 2
+radius = 2.5
+radial_segments = 64
+rings = 32
+material = SubResource("StandardMaterial3D_gbw8m")
+
+[node name="1" type="CSGSphere3D" parent="0"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.25, -8)
+operation = 2
+radius = 2.5
+radial_segments = 64
+rings = 32
+material = SubResource("StandardMaterial3D_gbw8m")
+
+[node name="2" type="CSGSphere3D" parent="0"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8, -2.25, 0)
+operation = 2
+radius = 2.5
+radial_segments = 64
+rings = 32
+material = SubResource("StandardMaterial3D_gbw8m")
+
+[node name="3" type="CSGSphere3D" parent="0"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.25, 8)
+operation = 2
+radius = 2.5
+radial_segments = 64
+rings = 32
+material = SubResource("StandardMaterial3D_gbw8m")
+
+[node name="4" type="CSGSphere3D" parent="0"]
+transform = Transform3D(0.707107, 0, -0.707107, 0, 1, 0, 0.707107, 0, 0.707107, 5.65685, -2.25, 5.65685)
+operation = 2
+radius = 2.5
+radial_segments = 64
+rings = 32
+material = SubResource("StandardMaterial3D_gbw8m")
+
+[node name="5" type="CSGSphere3D" parent="0"]
+transform = Transform3D(0.707107, 0, -0.707107, 0, 1, 0, 0.707107, 0, 0.707107, 5.65685, -2.25, -5.65685)
+operation = 2
+radius = 2.5
+radial_segments = 64
+rings = 32
+material = SubResource("StandardMaterial3D_gbw8m")
+
+[node name="6" type="CSGSphere3D" parent="0"]
+transform = Transform3D(0.707107, 0, -0.707107, 0, 1, 0, 0.707107, 0, 0.707107, -5.65685, -2.25, -5.65685)
+operation = 2
+radius = 2.5
+radial_segments = 64
+rings = 32
+material = SubResource("StandardMaterial3D_gbw8m")
+
+[node name="7" type="CSGSphere3D" parent="0"]
+transform = Transform3D(0.707107, 0, -0.707107, 0, 1, 0, 0.707107, 0, 0.707107, -5.65685, -2.25, 5.65685)
+operation = 2
+radius = 2.5
+radial_segments = 64
+rings = 32
+material = SubResource("StandardMaterial3D_gbw8m")
+
+[node name="CsgTorus3d" type="CSGTorus3D" parent="0"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.75, 0)
+operation = 2
+inner_radius = 5.0
+outer_radius = 8.0
+sides = 32
+smooth_faces = false
+material = SubResource("StandardMaterial3D_73ebp")
+
+[node name="CsgCylinder3d" type="CSGCylinder3D" parent="0"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.75, 0)
+operation = 2
+radius = 7.75
+height = 3.5
+sides = 16
+smooth_faces = false
+material = SubResource("StandardMaterial3D_avubi")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_aklas")
+
+[node name="DirectionalLight3d" type="OmniLight3D" parent="WorldEnvironment"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.5, 0.75, -0.25)
+light_color = Color(1, 1, 0, 1)
+light_energy = 16.0
+light_bake_mode = 1
+shadow_enabled = true
+omni_range = 13.0
+
+[node name="MeshInstance3d2" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.25, 0)
+mesh = SubResource("PlaneMesh_sqia2")
+
+[node name="MeshInstance3d" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 18, 2.75, 0)
+mesh = SubResource("SphereMesh_1kql7")
+skeleton = NodePath("../DirectionalLight3d")
+
+[node name="DirectionalLight3d" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.5, 0.433013, -0.75, 0, 0.866025, 0.5, 0.866025, -0.25, 0.433013, -25.5, 0, 0)
+visible = false
+light_energy = 9.038
+light_volumetric_fog_energy = 14.725
+light_bake_mode = 1
+shadow_enabled = true

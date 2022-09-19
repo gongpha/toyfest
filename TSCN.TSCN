@@ -145,6 +145,35 @@ func mainmenu_get_last(back : int = 0) :
 		
 		level += 1
 		
+const MAINMENU_ITEM_BOX := Vector2i(512, 48)
+		
+func mainmenu_gi(e : InputEvent) :
+	if mainmenu_tween_accept :
+		return
+	var all_y : int = mainmenu_current.size() * 64
+	var root_y : int = mainmenu_node.size.y - all_y
+	
+	if e is InputEventMouseButton :
+		if e.pressed and e.button_index == MOUSE_BUTTON_LEFT :
+			for i in mainmenu_current.size() :
+				var rect := Rect2i(
+					Vector2i(32, root_y + (48 * i) - 32), MAINMENU_ITEM_BOX
+				)
+				if rect.has_point(e.position) :
+					mainmenu_cursor = i
+					mainmenu_confirm()
+					return
+	if e is InputEventMouseMotion :
+		for i in mainmenu_current.size() :
+			if mainmenu_cursor == i :
+				continue
+			var rect := Rect2i(
+				Vector2i(32, root_y + (48 * i) - 32), MAINMENU_ITEM_BOX
+			)
+			if rect.has_point(e.position) :
+				mainmenu_cursor = i
+				mainmenu_ani_cursor()
+		
 func mainmenu_toggle_fullscreen() :
 	if settings.has('fullscreen') :
 		settings.fullscreen = !settings.fullscreen
@@ -279,6 +308,7 @@ func mainmenu_prepare() :
 	mainmenu_node = Control.new()
 	mainmenu_node.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	mainmenu_node.draw.connect(mainmenu_draw)
+	mainmenu_node.gui_input.connect(mainmenu_gi)
 	add_child(mainmenu_node)
 	
 	mainmenu_get_last()
